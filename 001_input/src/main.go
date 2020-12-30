@@ -19,26 +19,29 @@ type Wrap struct {
 }
 
 func main() {
-	fmt.Println("Hello, playground")
-
 	var filePath string
-	fmt.Scanln(&filePath);
-
 	// E:\viettel-training\001_input\resources\config.json
-
-	data, err := ioutil.ReadFile(filePath)
-
-	if err != nil {
-		panic(err)
+	var data []byte
+	var err error
+	for {
+		fmt.Println("Hello, please input config path:")
+		fmt.Scanln(&filePath);
+		data, err = ioutil.ReadFile(filePath)
+		if err != nil {
+			fmt.Println("The system cannot find the file specified.")
+		} else {
+			break
+		}
 	}
-
-	fmt.Println(string(data))
-
+	var init = Wrap{}
 	var res Wrap
 
 	if err := json.Unmarshal([]byte(data), &res); err != nil {
 		log.Fatalf("JSON unmarshaling failed: %s", err)
 	}
+	fmt.Println(init)
 	fmt.Println(res)
-	fmt.Println(res.Instances[0].Counts)
+	for _, el := range res.Instances {
+		fmt.Println(el.Name, el.Counts)
+	}
 }
