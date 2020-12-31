@@ -19,29 +19,60 @@ type Wrap struct {
 }
 
 func main() {
+	// ../resources/config.json
+	// ../resources/config_2.json
+	var init = Wrap{}
+	for i := 0; i < 5; i++ {
+		var res Wrap
+		data, _ := input()
+		if err := json.Unmarshal([]byte(data), &res); err != nil {
+			log.Fatalf("JSON unmarshaling failed: %s", err)
+		}
+		compare(res, &init)
+	}
+}
+
+func input() ([]byte, error) {
 	var filePath string
-	// E:\viettel-training\001_input\resources\config.json
-	var data []byte
-	var err error
 	for {
 		fmt.Println("Hello, please input config path:")
-		fmt.Scanln(&filePath);
-		data, err = ioutil.ReadFile(filePath)
+		fmt.Scanln(&filePath)
+		data, err := ioutil.ReadFile(filePath)
 		if err != nil {
 			fmt.Println("The system cannot find the file specified.")
 		} else {
-			break
+			return data, err
 		}
 	}
-	var init = Wrap{}
-	var res Wrap
+}
 
-	if err := json.Unmarshal([]byte(data), &res); err != nil {
-		log.Fatalf("JSON unmarshaling failed: %s", err)
-	}
-	fmt.Println(init)
-	fmt.Println(res)
+func compare(res Wrap, init *Wrap) {
 	for _, el := range res.Instances {
-		fmt.Println(el.Name, el.Counts)
+		// fmt.Println(el.Name, el.Counts)
+		if i, found := find(init.Instances, el); found {
+			if el.Counts > init.Instances[i].Counts {
+				// add more
+				fmt.Println(el.Name, "provision", el.Counts - init.Instances[i].Counts)
+			} else if el.Counts < init.Instances[i].Counts {
+				// remove
+				fmt.Println(el.Name, "delete", init.Instances[i].Counts - el.Counts)
+			} else {
+				fmt.Println(el.Name, "N/A", init.Instances[i].Counts)
+			}
+			(*init).Instances[i].Counts = el.Counts
+		} else {
+			// add to slice
+			init.Instances = append(init.Instances, el)
+			fmt.Println(el.Name, "provision", el.Counts)
+		}
 	}
+}
+
+func find(arr []Instance, e Instance) (int, bool){
+	for i, el := range arr {
+		if el.Name == e.Name {
+			return i, true
+		}
+	}
+	return -1, false
 }
