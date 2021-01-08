@@ -1,0 +1,8 @@
+<h1>Editing</h1>
+<form action="/edit/{{.Title}}" method="POST">
+    <input value="{{.Title}}" name="title" disabled/>
+    <br>
+    <textarea cols="20" rows="10" name="content">{{.Content}}</textarea>
+    <br>
+    <button type="submit">Save</button>
+</form>
